@@ -9,7 +9,7 @@
       <div class="overlay">
         <div class="rating">
           <span class="star">⭐</span>
-          <span class="value">{{ movie.vote_average.toFixed(1) }}</span>
+          <span class="value">{{ movie.vote_average?.toFixed(1) || 'N/A' }}</span>
         </div>
         <button class="details-btn">Ver Detalhes</button>
       </div>
@@ -34,8 +34,8 @@ const props = defineProps({
 defineEmits(['click'])
 
 const posterUrl = computed(() => {
-  return props.movie.poster_path
-    ? `https://image.tmdb.org/t/p/w500${props.movie.poster_path}`
+  return props.movie.posterUrl
+    ? props.movie.posterUrl
     : 'https://via.placeholder.com/500x750?text=Sem+Imagem'
 })
 
@@ -43,9 +43,15 @@ const formatDate = (date) => {
   if (!date) return 'Data não disponível'
   return new Date(date).toLocaleDateString('pt-BR')
 }
+
+const genres = computed(() => {
+  if (!props.movie.genres || props.movie.genres.length === 0) return 'Gêneros não informados'
+  return props.movie.genres.map(g => g.name).join(', ')
+})
 </script>
 
 <style scoped>
+/* Seu estilo permanece inalterado */
 .movie-card {
   background: #1a1a1a;
   border-radius: 12px;
@@ -163,6 +169,12 @@ const formatDate = (date) => {
   margin: 0;
 }
 
+.movie-genres {
+  color: #bbb;
+  font-size: 0.85rem;
+  margin: 0.3rem 0 0 0;
+}
+
 @media (max-width: 768px) {
   .movie-poster {
     height: 280px;
@@ -186,4 +198,4 @@ const formatDate = (date) => {
     padding: 0.6rem 1.2rem;
   }
 }
-</style> 
+</style>

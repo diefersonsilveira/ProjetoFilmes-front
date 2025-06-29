@@ -1,10 +1,10 @@
 <template>
   <div class="home">
     <h2>Filmes Populares</h2>
-    
+
     <div class="movies-grid">
       <MovieCard
-        v-for="movie in movies"
+        v-for="movie in paginatedMovies"
         :key="movie.id"
         :movie="movie"
         @click="$emit('select-movie', movie)"
@@ -19,11 +19,11 @@
       >
         ← Anterior
       </button>
-      
+
       <span class="page-info">
         Página {{ currentPage }} de {{ totalPages }}
       </span>
-      
+
       <button 
         :disabled="currentPage === totalPages"
         @click="changePage(currentPage + 1)"
@@ -36,38 +36,55 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import MovieCard from '../components/MovieCard.vue'
 import { getPopularMovies } from '../services/movieApi'
 
 const route = useRoute()
 const router = useRouter()
-const movies = ref([])
-const currentPage = ref(1)
-const totalPages = ref(0)
 
-const fetchMovies = async (page) => {
-  const data = await getPopularMovies(page)
-  movies.value = data.results
-  totalPages.value = Math.min(data.total_pages, 500)
+const allMovies = ref([]) // cache de filmes carregados
+const currentPage = ref(1)
+const pageSize = 15
+
+const totalPages = computed(() => {
+  return Math.ceil(allMovies.value.length / pageSize)
+})
+
+const paginatedMovies = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  const end = start + pageSize
+  return allMovies.value.slice(start, end)
+})
+
+const fetchMovies = async () => {
+  if (allMovies.value.length > 0) return // já está em cache, não busca novamente
+  try {
+    const data = await getPopularMovies()
+    allMovies.value = data.results || []
+  } catch (error) {
+    console.error('Erro ao buscar filmes populares:', error)
+    allMovies.value = []
+  }
 }
 
 const changePage = (page) => {
-  router.push({ query: { page } })
+  if (page < 1 || page > totalPages.value) return
+  currentPage.value = page
+  router.replace({ query: { page } })
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 onMounted(async () => {
   currentPage.value = Number(route.query.page) || 1
-  await fetchMovies(currentPage.value)
+  await fetchMovies()
 })
 
 watch(
   () => route.query.page,
-  async (newPage) => {
+  (newPage) => {
     currentPage.value = Number(newPage) || 1
-    await fetchMovies(currentPage.value)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 )
 </script>
@@ -146,4 +163,4 @@ h2 {
     margin-bottom: 1.5rem;
   }
 }
-</style> 
+</style>

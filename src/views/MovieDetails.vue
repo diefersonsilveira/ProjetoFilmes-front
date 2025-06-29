@@ -9,45 +9,13 @@
           <div class="info">
             <h1>{{ movie.title }}</h1>
             <div class="meta">
-              <span class="rating">⭐ {{ movie.vote_average.toFixed(1) }}</span>
-              <span class="year">{{ new Date(movie.release_date).getFullYear() }}</span>
-              <span class="runtime">{{ formatRuntime(movie.runtime) }}</span>
+              <span class="rating">⭐ {{ movie.vote_average?.toFixed(1) || 'N/A' }}</span>
+              <span class="year">{{ releaseYear }}</span>
             </div>
             <div class="genres">
-              {{ movie.genres.map(g => g.name).join(', ') }}
+              {{ genres }}
             </div>
             <p class="overview">{{ movie.overview }}</p>
-            
-            <div v-if="director" class="crew">
-              <strong>Diretor:</strong> {{ director.name }}
-            </div>
-            
-            <div class="cast">
-              <h3>Elenco Principal</h3>
-              <div class="cast-list">
-                <div v-for="actor in mainCast" :key="actor.id" class="cast-item">
-                  <img 
-                    :src="getActorImage(actor.profile_path)" 
-                    :alt="actor.name"
-                    class="cast-photo"
-                  >
-                  <div class="cast-info">
-                    <div class="actor-name">{{ actor.name }}</div>
-                    <div class="character-name">{{ actor.character }}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div v-if="trailer" class="trailer">
-              <h3>Trailer</h3>
-              <iframe
-                :src="trailerUrl"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-              ></iframe>
-            </div>
           </div>
         </div>
       </div>
@@ -67,53 +35,30 @@ const route = useRoute()
 const movie = ref(null)
 
 const posterUrl = computed(() => {
-  if (!movie.value?.poster_path) return 'https://via.placeholder.com/500x750?text=Sem+Imagem'
-  return `https://image.tmdb.org/t/p/w500${movie.value.poster_path}`
+  return movie.value?.posterUrl 
+    ? movie.value.posterUrl 
+    : 'https://via.placeholder.com/500x750?text=Sem+Imagem'
 })
 
-const backdropStyle = computed(() => {
-  if (!movie.value?.backdrop_path) return {}
-  return {
-    backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.value.backdrop_path})`
-  }
+const backdropStyle = computed(() => ({
+  background: '#000' // cor de fundo neutra, pode trocar se sua API passar backdrop futuramente
+}))
+
+const releaseYear = computed(() => {
+  return movie.value?.release_date
+    ? new Date(movie.value.release_date).getFullYear()
+    : 'Data não disponível'
 })
 
-const director = computed(() => {
-  if (!movie.value?.credits) return null
-  return movie.value.credits.crew.find(person => person.job === 'Director')
+const genres = computed(() => {
+  return movie.value?.genres && movie.value.genres.length > 0
+    ? movie.value.genres.map(g => g.name).join(', ')
+    : 'Gêneros não informados'
 })
-
-const mainCast = computed(() => {
-  if (!movie.value?.credits) return []
-  return movie.value.credits.cast.slice(0, 6)
-})
-
-const trailer = computed(() => {
-  if (!movie.value?.videos?.results) return null
-  return movie.value.videos.results.find(
-    video => video.type === 'Trailer' && video.site === 'YouTube'
-  )
-})
-
-const trailerUrl = computed(() => {
-  if (!trailer.value) return ''
-  return `https://www.youtube.com/embed/${trailer.value.key}`
-})
-
-const formatRuntime = (minutes) => {
-  const hours = Math.floor(minutes / 60)
-  const mins = minutes % 60
-  return `${hours}h ${mins}min`
-}
-
-const getActorImage = (path) => {
-  if (!path) return 'https://via.placeholder.com/185x278?text=Sem+Foto'
-  return `https://image.tmdb.org/t/p/w185${path}`
-}
 
 onMounted(async () => {
   const movieId = route.params.id
-  movie.value = await getMovieDetails(movieId)
+  movie.value = await getMovieDetails(movieId, 1) // ajusta para enviar usuarioId se necessário
 })
 </script>
 
@@ -180,66 +125,6 @@ h1 {
   margin-bottom: 2rem;
 }
 
-.crew {
-  margin-bottom: 2rem;
-}
-
-.cast h3 {
-  margin-bottom: 1rem;
-}
-
-.cast-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.cast-item {
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 8px;
-  overflow: hidden;
-  transition: transform 0.3s ease;
-}
-
-.cast-item:hover {
-  transform: translateY(-5px);
-}
-
-.cast-photo {
-  width: 100%;
-  height: 225px;
-  object-fit: cover;
-}
-
-.cast-info {
-  padding: 0.5rem;
-}
-
-.actor-name {
-  font-weight: bold;
-  margin-bottom: 0.25rem;
-}
-
-.character-name {
-  font-size: 0.9rem;
-  color: #ccc;
-}
-
-.trailer {
-  margin-top: 2rem;
-}
-
-.trailer h3 {
-  margin-bottom: 1rem;
-}
-
-.trailer iframe {
-  width: 100%;
-  height: 500px;
-  border-radius: 8px;
-}
-
 .loading {
   min-height: 100vh;
   display: flex;
@@ -258,9 +143,5 @@ h1 {
     max-width: 300px;
     margin: 0 auto;
   }
-
-  .trailer iframe {
-    height: 300px;
-  }
 }
-</style> 
+</style>

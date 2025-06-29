@@ -5,6 +5,7 @@
         <router-link to="/" class="logo">
           🎬 CineVue
         </router-link>
+
         <div class="search-container">
           <input 
             type="text" 
@@ -16,6 +17,10 @@
             🔍
           </button>
         </div>
+
+        <router-link to="/login" class="login-button">
+          Login
+        </router-link>
       </nav>
     </header>
 
@@ -102,7 +107,7 @@ nav {
   margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem;
   padding: 0 1rem;
 }
 
@@ -159,6 +164,21 @@ input[type="text"]::placeholder {
 }
 
 .search-button:hover {
+  background: var(--primary-dark);
+}
+
+.login-button {
+  background: var(--primary-color);
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
+}
+
+.login-button:hover {
   background: var(--primary-dark);
 }
 
