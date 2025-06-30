@@ -48,7 +48,7 @@ const fetchMovies = async () => {
   searchQuery.value = query
 
   try {
-    const usuarioId = getUsuarioId() // PEGA ID DO USUÁRIO OU 1
+    const usuarioId = getUsuarioId()
     const data = await searchMovies(query, usuarioId)
     movies.value = data.results || []
   } catch (error) {
@@ -65,13 +65,15 @@ watch(() => route.query.q, fetchMovies)
 
 <style scoped>
 .search {
+  background: #f5f7f4;
+  color: #222;
   animation: fadeIn 0.5s ease;
 }
 
 h2 {
   font-size: 2rem;
   margin-bottom: 2rem;
-  color: var(--primary-color);
+  color: #19673B;
 }
 
 .movies-grid {

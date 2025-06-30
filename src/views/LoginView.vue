@@ -28,7 +28,7 @@ import { useRouter } from 'vue-router'
 // No futuro, troque para seu serviço real
 const fakeLogin = async (email, password) => {
   if (email === 'admin@admin.com' && password === '123456') {
-    return { usuarioId: 42 } // exemplo retornado pelo backend
+    return { usuarioId: 42 }
   } else {
     throw new Error('Credenciais inválidas')
   }
@@ -42,12 +42,10 @@ const router = useRouter()
 const login = async () => {
   error.value = ''
   try {
-    // Simule a chamada real
     const response = await fakeLogin(email.value, password.value)
     const usuarioId = response.usuarioId
 
     localStorage.setItem('usuarioId', usuarioId)
-    // Redireciona para a Home
     router.push('/')
   } catch (err) {
     error.value = err.message || 'Erro ao fazer login'
