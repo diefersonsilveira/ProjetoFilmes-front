@@ -6,9 +6,17 @@
         v-for="movie in paginatedMovies"
         :key="movie.id"
         :movie="movie"
-        @click="$emit('select-movie', movie)"
+        @click="openModal(movie)"
       />
     </div>
+
+    <MovieDetailsModal
+      v-if="showModal"
+      :show="showModal"
+      :movieId="selectedMovieId"
+      @close="showModal = false"
+    />
+
     <div class="pagination" v-if="totalPages > 1">
       <button 
         :disabled="currentPage === 1"
@@ -35,6 +43,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import MovieCard from '../components/MovieCard.vue'
+import MovieDetailsModal from '../components/MovieModal.vue'
 import { getPopularMovies } from '../services/movieApi'
 
 const route = useRoute()
@@ -43,6 +52,14 @@ const router = useRouter()
 const allMovies = ref([])
 const currentPage = ref(1)
 const pageSize = 15
+
+const selectedMovieId = ref(null)
+const showModal = ref(false)
+
+const openModal = (movie) => {
+  selectedMovieId.value = movie.id
+  showModal.value = true
+}
 
 const totalPages = computed(() => {
   return Math.ceil(allMovies.value.length / pageSize)
@@ -55,7 +72,6 @@ const paginatedMovies = computed(() => {
 })
 
 const fetchMovies = async () => {
-  // Tenta carregar do cache
   const cached = localStorage.getItem('popularMovies')
   if (cached) {
     try {
@@ -65,7 +81,6 @@ const fetchMovies = async () => {
       }
     } catch {}
   }
-  // Busca da API e atualiza cache
   try {
     const data = await getPopularMovies()
     allMovies.value = data.results || []
@@ -180,23 +195,5 @@ h2 {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
   }
-}
-
-.logo-img {
-  height: 200px;
-  width: auto;
-  max-width: 400px;
-  object-fit: contain;
-  display: block;
-}
-
-.movie-card {
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  height: 100%;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(25, 103, 59, 0.07);
 }
 </style>

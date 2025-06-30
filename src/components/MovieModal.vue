@@ -4,69 +4,26 @@
       <div class="modal-content" @click.stop>
         <button class="modal-close" @click="$emit('close')">×</button>
         <div v-if="movie" class="movie-details">
-          <div class="backdrop" :style="backdropStyle">
-            <div class="overlay">
-              <div class="content">
-                <div class="poster">
-                  <img :src="posterUrl" :alt="movie.title">
-                  <div class="rating">
-                    <span class="rating-value">{{ movie.vote_average.toFixed(1) }}</span>
-                    <span class="rating-max">/10</span>
-                    <div class="rating-stars">⭐</div>
-                  </div>
+          <div class="overlay">
+            <div class="content">
+              <div class="poster">
+                <img :src="posterUrl" :alt="movie.title">
+                <div class="rating">
+                  <span class="rating-value">{{ movie.vote_average.toFixed(1) }}</span>
+                  <span class="rating-max">/10</span>
+                  <div class="rating-stars">⭐</div>
                 </div>
-                <div class="info">
-                  <h1>{{ movie.title }}</h1>
-                  <div class="meta">
-                    <span class="year">{{ new Date(movie.release_date).getFullYear() }}</span>
-                    <span class="dot">•</span>
-                    <span class="runtime">{{ formatRuntime(movie.runtime) }}</span>
-                    <span class="dot">•</span>
-                    <span class="genres">{{ movie.genres.map(g => g.name).join(', ') }}</span>
-                  </div>
-                  
-                  <div class="tagline" v-if="movie.tagline">
-                    "{{ movie.tagline }}"
-                  </div>
-
-                  <div class="section">
-                    <h3>Sinopse</h3>
-                    <p class="overview">{{ movie.overview }}</p>
-                  </div>
-                  
-                  <div class="section crew" v-if="director">
-                    <h3>Direção</h3>
-                    <p>{{ director.name }}</p>
-                  </div>
-                  
-                  <div class="section cast">
-                    <h3>Elenco Principal</h3>
-                    <div class="cast-list">
-                      <div v-for="actor in mainCast" :key="actor.id" class="cast-item">
-                        <img 
-                          :src="getActorImage(actor.profile_path)" 
-                          :alt="actor.name"
-                          class="cast-photo"
-                        >
-                        <div class="cast-info">
-                          <div class="actor-name">{{ actor.name }}</div>
-                          <div class="character-name">{{ actor.character }}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div v-if="trailer" class="section trailer">
-                    <h3>Trailer</h3>
-                    <div class="video-container">
-                      <iframe
-                        :src="trailerUrl"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen
-                      ></iframe>
-                    </div>
-                  </div>
+              </div>
+              <div class="info">
+                <h1>{{ movie.title }}</h1>
+                <div class="meta">
+                  <span class="year">{{ new Date(movie.release_date).getFullYear() }}</span>
+                  <span class="dot">•</span>
+                  <span class="genres">{{ movie.genres.map(g => g.name).join(', ') }}</span>
+                </div>
+                <div class="section">
+                  <h3>Sinopse</h3>
+                  <p class="overview">{{ movie.overview }}</p>
                 </div>
               </div>
             </div>
@@ -94,56 +51,23 @@ const emit = defineEmits(['close'])
 const movie = ref(null)
 
 const posterUrl = computed(() => {
-  if (!movie.value?.poster_path) return 'https://via.placeholder.com/500x750?text=Sem+Imagem'
-  return `https://image.tmdb.org/t/p/w500${movie.value.poster_path}`
-})
-
-const backdropStyle = computed(() => {
-  if (!movie.value?.backdrop_path) return {}
-  return {
-    backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.value.backdrop_path})`
+  if (movie.value?.posterPath) {
+    const path = movie.value.posterPath.startsWith('/') ? movie.value.posterPath : `/${movie.value.posterPath}`;
+    return `https://image.tmdb.org/t/p/w500${path}`;
+  } else if (movie.value?.posterUrl && !movie.value.posterUrl.includes('via.placeholder.com')) {
+    return movie.value.posterUrl;
+  } else {
+    return 'https://via.placeholder.com/500x750?text=Sem+Imagem';
   }
-})
-
-const director = computed(() => {
-  if (!movie.value?.credits) return null
-  return movie.value.credits.crew.find(person => person.job === 'Director')
-})
-
-const mainCast = computed(() => {
-  if (!movie.value?.credits) return []
-  return movie.value.credits.cast.slice(0, 6)
-})
-
-const trailer = computed(() => {
-  if (!movie.value?.videos?.results) return null
-  return movie.value.videos.results.find(
-    video => video.type === 'Trailer' && video.site === 'YouTube'
-  )
-})
-
-const trailerUrl = computed(() => {
-  if (!trailer.value) return ''
-  return `https://www.youtube.com/embed/${trailer.value.key}`
-})
-
-const formatRuntime = (minutes) => {
-  const hours = Math.floor(minutes / 60)
-  const mins = minutes % 60
-  return `${hours}h ${mins}min`
-}
-
-const getActorImage = (path) => {
-  if (!path) return 'https://via.placeholder.com/185x278?text=Sem+Foto'
-  return `https://image.tmdb.org/t/p/w185${path}`
-}
+});
 
 const fetchMovieDetails = async () => {
-  movie.value = null
+  movie.value = null;
   if (props.movieId) {
-    movie.value = await getMovieDetails(props.movieId)
+    movie.value = await getMovieDetails(props.movieId);
+    console.log('Detalhes carregados:', movie.value);
   }
-}
+};
 
 watch(() => props.movieId, fetchMovieDetails, { immediate: true })
 </script>
