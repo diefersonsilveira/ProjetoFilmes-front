@@ -20,6 +20,11 @@ const router = createRouter({
       path: '/movie/:id',
       name: 'movie-details',
       component: MovieDetails
+    },
+    {
+      path: '/login',
+      name: 'Login',
+      component: () => import('../views/LoginView.vue')
     }
   ]
 })

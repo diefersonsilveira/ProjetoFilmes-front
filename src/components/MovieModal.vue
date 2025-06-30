@@ -170,7 +170,8 @@ watch(() => props.movieId, fetchMovieDetails, { immediate: true })
   max-width: 1200px;
   max-height: 90vh;
   overflow-y: auto;
-  background: #1a1a1a;
+  background: #fff;
+  color: #222;
   border-radius: 16px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
@@ -215,7 +216,7 @@ watch(() => props.movieId, fetchMovieDetails, { immediate: true })
   display: grid;
   grid-template-columns: 300px 1fr;
   gap: 2rem;
-  color: white;
+  color: #fff;
 }
 
 .poster {
@@ -245,7 +246,7 @@ watch(() => props.movieId, fetchMovieDetails, { immediate: true })
 .rating-value {
   font-size: 1.5rem;
   font-weight: bold;
-  color: #4CAF50;
+  color: #19673B;
 }
 
 .rating-max {
@@ -260,7 +261,7 @@ h1 {
   font-size: 2.5rem;
   font-weight: bold;
   margin-bottom: 1rem;
-  background: linear-gradient(45deg, #4CAF50, #8BC34A);
+  background: #19673B;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -289,7 +290,8 @@ h1 {
 }
 
 .section h3 {
-  color: #4CAF50;
+  color: #19673B;
+  font-weight: 600;
   margin-bottom: 1rem;
   font-size: 1.2rem;
 }
@@ -324,16 +326,21 @@ h1 {
 
 .cast-info {
   padding: 0.75rem;
+  color: white;
+  font-weight: 400;
 }
 
 .actor-name {
   font-weight: bold;
   margin-bottom: 0.25rem;
+  color: white;
+  font-weight: 400;
 }
 
 .character-name {
   font-size: 0.9rem;
-  color: #999;
+  color: white;
+  font-weight: 400;
 }
 
 .video-container {
@@ -365,7 +372,7 @@ h1 {
 .loader {
   width: 48px;
   height: 48px;
-  border: 5px solid #4CAF50;
+  border: 5px solid #19673B;
   border-bottom-color: transparent;
   border-radius: 50%;
   animation: rotation 1s linear infinite;

@@ -9,7 +9,7 @@
       <div class="overlay">
         <div class="rating">
           <span class="star">⭐</span>
-          <span class="value">{{ movie.vote_average.toFixed(1) }}</span>
+          <span class="value">{{ movie.vote_average?.toFixed(1) || 'N/A' }}</span>
         </div>
         <button class="details-btn">Ver Detalhes</button>
       </div>
@@ -34,8 +34,8 @@ const props = defineProps({
 defineEmits(['click'])
 
 const posterUrl = computed(() => {
-  return props.movie.poster_path
-    ? `https://image.tmdb.org/t/p/w500${props.movie.poster_path}`
+  return props.movie.posterUrl
+    ? props.movie.posterUrl
     : 'https://via.placeholder.com/500x750?text=Sem+Imagem'
 })
 
@@ -43,17 +43,23 @@ const formatDate = (date) => {
   if (!date) return 'Data não disponível'
   return new Date(date).toLocaleDateString('pt-BR')
 }
+
+const genres = computed(() => {
+  if (!props.movie.genres || props.movie.genres.length === 0) return 'Gêneros não informados'
+  return props.movie.genres.map(g => g.name).join(', ')
+})
 </script>
 
 <style scoped>
 .movie-card {
-  background: #1a1a1a;
+  background: #fff;
+  color: #222;
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s ease;
   height: 100%;
   cursor: pointer;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(25, 103, 59, 0.07);
 }
 
 .movie-card:hover {
@@ -101,7 +107,7 @@ const formatDate = (date) => {
 }
 
 .rating {
-  background: rgba(26, 26, 26, 0.9);
+  background: rgba(25, 103, 59, 0.85);
   padding: 0.5rem 1rem;
   border-radius: 20px;
   display: inline-flex;
@@ -115,13 +121,13 @@ const formatDate = (date) => {
 }
 
 .value {
-  color: #4CAF50;
+  color: #fff;
   font-weight: bold;
 }
 
 .details-btn {
-  background: #4CAF50;
-  color: white;
+  background: #19673B;
+  color: #fff;
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 25px;
@@ -134,7 +140,7 @@ const formatDate = (date) => {
 }
 
 .details-btn:hover {
-  background: #45a049;
+  background: #19673B;
 }
 
 .movie-info {
@@ -146,7 +152,7 @@ const formatDate = (date) => {
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  color: white;
+  color: #222;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2; 
@@ -161,13 +167,19 @@ const formatDate = (date) => {
   color: #999;
   font-size: 0.9rem;
   margin: 0;
+  font-weight: 400;
+}
+
+.movie-genres {
+  color: #bbb;
+  font-size: 0.85rem;
+  margin: 0.3rem 0 0 0;
 }
 
 @media (max-width: 768px) {
   .movie-poster {
     height: 280px;
   }
-  
   .overlay {
     opacity: 1;
     background: linear-gradient(
@@ -176,14 +188,12 @@ const formatDate = (date) => {
       rgba(26, 26, 26, 0.9)
     );
   }
-  
   .rating {
     font-size: 0.9rem;
   }
-  
   .details-btn {
     font-size: 0.9rem;
     padding: 0.6rem 1.2rem;
   }
 }
-</style> 
+</style>
