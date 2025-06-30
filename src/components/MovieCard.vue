@@ -51,15 +51,15 @@ const genres = computed(() => {
 </script>
 
 <style scoped>
-/* Seu estilo permanece inalterado */
 .movie-card {
-  background: #1a1a1a;
+  background: #fff;
+  color: #222;
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s ease;
   height: 100%;
   cursor: pointer;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(25, 103, 59, 0.07);
 }
 
 .movie-card:hover {
@@ -107,7 +107,7 @@ const genres = computed(() => {
 }
 
 .rating {
-  background: rgba(26, 26, 26, 0.9);
+  background: rgba(25, 103, 59, 0.85);
   padding: 0.5rem 1rem;
   border-radius: 20px;
   display: inline-flex;
@@ -121,13 +121,13 @@ const genres = computed(() => {
 }
 
 .value {
-  color: #4CAF50;
+  color: #fff;
   font-weight: bold;
 }
 
 .details-btn {
-  background: #4CAF50;
-  color: white;
+  background: #19673B;
+  color: #fff;
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 25px;
@@ -140,7 +140,7 @@ const genres = computed(() => {
 }
 
 .details-btn:hover {
-  background: #45a049;
+  background: #19673B;
 }
 
 .movie-info {
@@ -152,7 +152,7 @@ const genres = computed(() => {
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  color: white;
+  color: #222;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2; 
@@ -167,6 +167,7 @@ const genres = computed(() => {
   color: #999;
   font-size: 0.9rem;
   margin: 0;
+  font-weight: 400;
 }
 
 .movie-genres {
@@ -179,7 +180,6 @@ const genres = computed(() => {
   .movie-poster {
     height: 280px;
   }
-  
   .overlay {
     opacity: 1;
     background: linear-gradient(
@@ -188,11 +188,9 @@ const genres = computed(() => {
       rgba(26, 26, 26, 0.9)
     );
   }
-  
   .rating {
     font-size: 0.9rem;
   }
-  
   .details-btn {
     font-size: 0.9rem;
     padding: 0.6rem 1.2rem;
