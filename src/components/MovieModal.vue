@@ -3,13 +3,14 @@
     <div v-if="show" class="modal-backdrop" @click="$emit('close')">
       <div class="modal-content" @click.stop>
         <button class="modal-close" @click="$emit('close')">×</button>
+
         <div v-if="movie" class="movie-details">
           <div class="overlay">
             <div class="content">
               <div class="poster">
-                <img :src="posterUrl" :alt="movie.title">
+                <img :src="posterUrl" :alt="movie.title" />
                 <div class="rating">
-                  <span class="rating-value">{{ movie.vote_average.toFixed(1) }}</span>
+                  <span class="rating-value">{{ movie.vote_average?.toFixed(1) || 'N/A' }}</span>
                   <span class="rating-max">/10</span>
                   <div class="rating-stars">⭐</div>
                 </div>
@@ -25,10 +26,27 @@
                   <h3>Sinopse</h3>
                   <p class="overview">{{ movie.overview }}</p>
                 </div>
+
+                <!-- Formulário de avaliação -->
+                <div class="section">
+                  <h3>Avaliar este filme</h3>
+                  <form @submit.prevent="enviarAvaliacao" class="avaliacao-form">
+                    <label>Nota (0 a 5):</label>
+                    <input type="number" v-model.number="nota" min="0" max="5" step="0.5" required />
+
+                    <label>Comentário:</label>
+                    <textarea v-model="comentario" placeholder="Deixe seu comentário..." rows="3"></textarea>
+
+                    <button type="submit" :disabled="isSending">
+                      {{ isSending ? 'Enviando...' : 'Enviar Avaliação' }}
+                    </button>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
         <div v-else class="loading">
           <div class="loader"></div>
           <span>Carregando...</span>
@@ -39,38 +57,60 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { getMovieDetails } from '../services/movieApi'
+import { ref, computed, watch } from 'vue';
+import { getMovieDetails } from '../services/movieApi';
+import { criarAvaliacao } from '../services/avaliacoesApi';
 
 const props = defineProps({
   show: Boolean,
   movieId: Number
-})
+});
 
-const emit = defineEmits(['close'])
-const movie = ref(null)
+const emit = defineEmits(['close']);
+
+const movie = ref(null);
+const nota = ref(0);
+const comentario = ref('');
+const isSending = ref(false);
 
 const posterUrl = computed(() => {
   if (movie.value?.posterPath) {
-    const path = movie.value.posterPath.startsWith('/') ? movie.value.posterPath : `/${movie.value.posterPath}`;
-    return `https://image.tmdb.org/t/p/w500${path}`;
-  } else if (movie.value?.posterUrl && !movie.value.posterUrl.includes('via.placeholder.com')) {
-    return movie.value.posterUrl;
+    return `https://image.tmdb.org/t/p/w500${movie.value.posterPath}`;
   } else {
     return 'https://via.placeholder.com/500x750?text=Sem+Imagem';
   }
 });
 
 const fetchMovieDetails = async () => {
-  movie.value = null;
   if (props.movieId) {
+    movie.value = null;
     movie.value = await getMovieDetails(props.movieId);
     console.log('Detalhes carregados:', movie.value);
   }
 };
 
-watch(() => props.movieId, fetchMovieDetails, { immediate: true })
+const enviarAvaliacao = async () => {
+  if (nota.value < 0 || nota.value > 5) {
+    alert('A nota deve ser entre 0 e 5.');
+    return;
+  }
+  isSending.value = true;
+  try {
+    await criarAvaliacao(movie.value.id, nota.value, comentario.value);
+    alert('Avaliação enviada com sucesso!');
+    nota.value = 0;
+    comentario.value = '';
+  } catch (error) {
+    console.error(error);
+    alert('Erro ao enviar avaliação. Verifique se está logado.');
+  } finally {
+    isSending.value = false;
+  }
+};
+
+watch(() => props.movieId, fetchMovieDetails, { immediate: true });
 </script>
+
 
 <style scoped>
 .modal-backdrop {
@@ -345,4 +385,38 @@ h1 {
     padding: 1rem;
   }
 }
-</style> 
+
+.avaliacao-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.avaliacao-form input,
+.avaliacao-form textarea {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.avaliacao-form button {
+  background: #19673B;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.avaliacao-form button:hover:not(:disabled) {
+  background: #145c32;
+}
+
+.avaliacao-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+</style>
