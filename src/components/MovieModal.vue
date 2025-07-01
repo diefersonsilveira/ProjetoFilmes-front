@@ -33,8 +33,8 @@
                 <div class="section">
                   <h3>Avaliar este filme</h3>
                   <form @submit.prevent="enviarAvaliacao" class="avaliacao-form">
-                    <label>Nota (0 a 5):</label>
-                    <input type="number" v-model.number="nota" min="0" max="5" step="0.5" required />
+                    <label>Nota (1 a 5):</label>
+                    <input type="number" v-model.number="nota" min="1" max="5" step="0.5" required />
 
                     <label>Comentário:</label>
                     <textarea v-model="comentario" placeholder="Deixe seu comentário..." rows="3"></textarea>
@@ -87,7 +87,7 @@ const props = defineProps({
 });
 
 const movie = ref(null);
-const nota = ref(0);
+const nota = ref(1);
 const comentario = ref('');
 const isSending = ref(false);
 const avaliacoes = ref([]);
@@ -114,15 +114,15 @@ const fetchAvaliacoes = async () => {
 };
 
 const enviarAvaliacao = async () => {
-  if (nota.value < 0 || nota.value > 5) {
-    alert('A nota deve ser entre 0 e 5.');
+  if (nota.value < 1 || nota.value > 5) {
+    alert('A nota deve ser entre 1 e 5.');
     return;
   }
   isSending.value = true;
   try {
     await criarAvaliacao(props.movieId, nota.value, comentario.value);
     alert('Avaliação enviada com sucesso!');
-    nota.value = 0;
+    nota.value = 1;
     comentario.value = '';
     await fetchAvaliacoes();
   } catch (error) {
