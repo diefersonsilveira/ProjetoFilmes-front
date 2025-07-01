@@ -19,8 +19,11 @@
           </div>
         </div>
         <div class="login-area">
-          <button @click="openLoginModal" class="login-button">
+          <button v-if="!isLoggedIn" @click="openLoginModal" class="login-button">
             Login
+          </button>
+          <button v-else @click="handleLogout" class="login-button">
+            Sair ({{ usuarioNome }})
           </button>
         </div>
       </nav>
@@ -39,7 +42,7 @@
     <LoginModal
       :show="showLoginModal"
       @close="closeLoginModal"
-      @login="handleLogin"
+      @login-success="handleLoginSuccess"
       @switch-to-register="switchToRegister"
     />
 
@@ -53,11 +56,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import MovieModal from './components/MovieModal.vue'
 import LoginModal from './components/LoginModal.vue'
 import RegisterModal from './components/RegisterModal.vue'
+import { getUsuarioId, getUsuarioNome, clearUsuario } from './services/user'
 
 const router = useRouter()
 const searchQuery = ref('')
@@ -65,58 +69,74 @@ const selectedMovieId = ref(null)
 const showLoginModal = ref(false)
 const showRegisterModal = ref(false)
 
+// Estado reativo do usuário
+const userState = ref({
+  id: getUsuarioId(),
+  nome: getUsuarioNome()
+});
+
+const isLoggedIn = computed(() => !!userState.value.id);
+const usuarioNome = computed(() => userState.value.nome);
+
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
     router.push({
       name: 'search',
       query: { q: searchQuery.value.trim() }
-    })
+    });
   }
-}
+};
 
 const openMovieModal = (movie) => {
-  selectedMovieId.value = movie.id
-}
+  selectedMovieId.value = movie.id;
+};
 
 const closeMovieModal = () => {
-  selectedMovieId.value = null
-}
+  selectedMovieId.value = null;
+};
 
 const openLoginModal = () => {
-  showLoginModal.value = true
-}
+  showLoginModal.value = true;
+};
 
 const closeLoginModal = () => {
-  showLoginModal.value = false
-}
+  showLoginModal.value = false;
+};
 
 const openRegisterModal = () => {
-  showRegisterModal.value = true
-}
+  showRegisterModal.value = true;
+};
 
 const closeRegisterModal = () => {
-  showRegisterModal.value = false
-}
+  showRegisterModal.value = false;
+};
 
 const switchToRegister = () => {
-  showLoginModal.value = false
-  showRegisterModal.value = true
-}
+  showLoginModal.value = false;
+  showRegisterModal.value = true;
+};
 
 const switchToLogin = () => {
-  showRegisterModal.value = false
-  showLoginModal.value = true
-}
+  showRegisterModal.value = false;
+  showLoginModal.value = true;
+};
 
-const handleLogin = (loginData) => {
-  console.log('Dados do login:', loginData)
-  alert(`Login realizado com sucesso!\nEmail: ${loginData.email}`)
-}
+const handleLoginSuccess = (user) => {
+  console.log('Usuário logado:', user);
+  userState.value.id = user.usuarioId;
+  userState.value.nome = user.nomeCompleto;
+};
 
-const handleRegister = (registerData) => {
-  console.log('Dados do registro:', registerData)
-  alert(`Registro realizado com sucesso!\nEmail: ${registerData.email}`)
-}
+const handleRegister = (user) => {
+  console.log('Usuário registrado:', user);
+  alert(`Registro realizado com sucesso para ${user.nomeCompleto}!`);
+};
+
+const handleLogout = () => {
+  clearUsuario();
+  userState.value.id = null;
+  userState.value.nome = null;
+};
 </script>
 
 <style>

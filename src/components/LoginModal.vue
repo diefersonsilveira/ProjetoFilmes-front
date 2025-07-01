@@ -45,60 +45,68 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch } from 'vue';
+import { loginUser } from '../services/userApi';
+import { saveUsuario } from '../services/user';
 
 const props = defineProps({
   show: {
     type: Boolean,
     default: false
   }
-})
+});
 
-const emit = defineEmits(['close', 'login', 'switch-to-register'])
+const emit = defineEmits(['close', 'login-success', 'switch-to-register']);
 
-const email = ref('')
-const password = ref('')
-const isLoading = ref(false)
+const email = ref('');
+const password = ref('');
+const isLoading = ref(false);
 
 const closeModal = () => {
-  emit('close')
-}
+  emit('close');
+};
 
 const switchToRegister = () => {
-  emit('switch-to-register')
-}
+  emit('switch-to-register');
+};
 
 const handleLogin = async () => {
-  if (!email.value || !password.value) return
-  
-  isLoading.value = true
-  
+  if (!email.value || !password.value) return;
+
+  isLoading.value = true;
+
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    emit('login', {
+    const loginPayload = {
       email: email.value,
-      password: password.value
-    })
-    
-    email.value = ''
-    password.value = ''
-    
-    closeModal()
+      senha: password.value
+    };
+
+    const user = await loginUser(loginPayload);
+
+    saveUsuario(user.usuarioId, user.nomeCompleto);
+
+    emit('login-success', user);
+
+    email.value = '';
+    password.value = '';
+
+    closeModal();
   } catch (error) {
-    console.error('Erro no login:', error)
+    console.error('Erro no login:', error);
+    alert('Email ou senha incorretos.');
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 watch(() => props.show, (newValue) => {
   if (!newValue) {
-    email.value = ''
-    password.value = ''
+    email.value = '';
+    password.value = '';
   }
-})
+});
 </script>
+
 
 <style scoped>
 .modal-overlay {
