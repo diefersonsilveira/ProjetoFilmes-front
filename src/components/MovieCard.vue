@@ -1,53 +1,31 @@
 <template>
   <div class="movie-card">
     <div class="poster-container" @click="$emit('click', movie)">
-      <img
-        :src="posterUrl"
-        :alt="movie.title"
-        class="movie-poster"
-      >
+      <img :src="posterUrl" :alt="movie.title" class="movie-poster">
       <div class="overlay">
         <div class="top-bar">
           <div class="rating">
             <span class="star">⭐</span>
             <span class="value">{{ movie.vote_average?.toFixed(1) || 'N/A' }}</span>
           </div>
-          <button
-            class="fav-icon-btn"
-            @click.stop="toggleFavorito"
-            :aria-label="isFavorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
-          >
-            <svg
-              v-if="isFavorito"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="red"
-              width="24"
-              height="24"
-            >
+          <button class="fav-icon-btn" @click.stop="toggleFavorito"
+            :aria-label="isFavorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'">
+            <svg v-if="isFavorito" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" width="20"
+              height="20">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
-                       2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09
-                       C13.09 3.81 14.76 3 16.5 3
-                       19.58 3 22 5.42 22 8.5
-                       c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+           2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09
+           C13.09 3.81 14.76 3 16.5 3
+           19.58 3 22 5.42 22 8.5
+           c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg>
-            <svg
-              v-else
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              width="24"
-              height="24"
-            >
+            <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" stroke="white"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
               <path d="M20.84 4.61c-1.54-1.34-3.77-1.34-5.31 0L12 7.09
-                       l-3.53-2.48c-1.54-1.34-3.77-1.34-5.31 0-1.88
-                       1.64-1.88 4.3 0 5.94L12 21.35l8.84-10.8
-                       c1.88-1.64 1.88-4.3 0-5.94z"/>
+           l-3.53-2.48c-1.54-1.34-3.77-1.34-5.31 0-1.88
+           1.64-1.88 4.3 0 5.94L12 21.35l8.84-10.8
+           c1.88-1.64 1.88-4.3 0-5.94z" />
             </svg>
+
           </button>
         </div>
         <button class="details-btn">Ver Detalhes</button>
@@ -151,11 +129,9 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(26, 26, 26, 0.2),
-    rgba(26, 26, 26, 0.9)
-  );
+  background: linear-gradient(to bottom,
+      rgba(26, 26, 26, 0.2),
+      rgba(26, 26, 26, 0.9));
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -193,13 +169,26 @@ onMounted(() => {
 }
 
 .fav-icon-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
+  background: rgba(25, 103, 59, 0.85);
+  /* igual ao .rating */
+  padding: 0.5rem;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.fav-icon-btn:hover {
+  background: rgba(25, 103, 59, 1);
+  transform: scale(1.05);
+}
+
+.fav-icon-btn svg {
+  width: 20px;
+  height: 20px;
 }
 
 .details-btn {

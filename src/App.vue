@@ -7,18 +7,25 @@
         </router-link>
         <div class="search-area">
           <div class="search-container">
-            <input 
-              type="text" 
-              v-model="searchQuery"
-              @keyup.enter="handleSearch"
-              placeholder="Buscar filmes..."
-            >
+            <input type="text" v-model="searchQuery" @keyup.enter="handleSearch" placeholder="Buscar filmes...">
             <button @click="handleSearch" class="search-button" aria-label="Buscar">
-              <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
             </button>
           </div>
         </div>
         <div class="login-area">
+          <router-link to="/favoritos" class="favorites-button" aria-label="Favoritos">
+            <svg class="heart-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
+              fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M20.8 4.6c-1.5-1.4-3.9-1.4-5.4 0L12 8l-3.4-3.4c-1.5-1.4-3.9-1.4-5.4 0-1.6 1.5-1.6 4 0 5.5L12 21l8.8-10.9c1.6-1.5 1.6-4 0-5.5z" />
+            </svg>
+          </router-link>
+
           <button v-if="!isLoggedIn" @click="openLoginModal" class="login-button">
             Login
           </button>
@@ -26,6 +33,7 @@
             Sair ({{ usuarioNome }})
           </button>
         </div>
+
       </nav>
     </header>
 
@@ -33,25 +41,13 @@
       <router-view @select-movie="openMovieModal"></router-view>
     </main>
 
-    <MovieModal
-      :show="!!selectedMovieId"
-      :movie-id="selectedMovieId"
-      @close="closeMovieModal"
-    />
+    <MovieModal :show="!!selectedMovieId" :movie-id="selectedMovieId" @close="closeMovieModal" />
 
-    <LoginModal
-      :show="showLoginModal"
-      @close="closeLoginModal"
-      @login-success="handleLoginSuccess"
-      @switch-to-register="switchToRegister"
-    />
+    <LoginModal :show="showLoginModal" @close="closeLoginModal" @login-success="handleLoginSuccess"
+      @switch-to-register="switchToRegister" />
 
-    <RegisterModal
-      :show="showRegisterModal"
-      @close="closeRegisterModal"
-      @register="handleRegister"
-      @switch-to-login="switchToLogin"
-    />
+    <RegisterModal :show="showRegisterModal" @close="closeRegisterModal" @register="handleRegister"
+      @switch-to-login="switchToLogin" />
   </div>
 </template>
 
@@ -156,7 +152,7 @@ const handleLogout = () => {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   background: #f5f7f4;
   color: #222;
@@ -222,7 +218,7 @@ header {
   align-items: center;
   background: #fff;
   border-radius: 32px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   padding: 0.2rem 0.4rem 0.2rem 1.2rem;
   gap: 0.5rem;
 }
@@ -322,19 +318,23 @@ main {
     padding: 1.2rem 1rem 1.2rem 1rem;
     min-height: unset;
   }
+
   .logo-area {
     margin-right: 0;
     justify-content: center;
   }
+
   .login-area {
     margin-left: 0;
     justify-content: center;
   }
+
   .search-area {
     width: 100%;
     max-width: 100%;
     margin: 0.5rem 0;
   }
+
   .search-container {
     max-width: 100%;
   }
@@ -344,25 +344,70 @@ main {
   header {
     padding: 0.5rem 0 0.5rem 0;
   }
+
   .logo-img {
     height: 48px;
     max-width: 90px;
   }
+
   .login-button {
     padding: 0 1.2rem;
     font-size: 1rem;
     height: 40px;
   }
+
   .search-button {
     width: 40px;
     height: 40px;
   }
+
   .search-container {
     padding: 0.1rem 0.2rem 0.1rem 0.7rem;
   }
+
   input[type="text"] {
     font-size: 1rem;
     padding: 0.7rem 0.5rem 0.7rem 0;
   }
 }
+
+.favorites-button {
+  background: #19673B;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-right: 1rem;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 2px 8px rgba(25, 103, 59, 0.15);
+}
+
+.favorites-button:hover {
+  background: #155f36;
+  transform: scale(1.05);
+}
+
+.heart-icon {
+  width: 24px;
+  height: 24px;
+  fill: white;
+  stroke: white;
+  transition: transform 0.2s ease;
+}
+
+.favorites-button:hover .heart-icon {
+  transform: scale(1.05);
+}
+
+@media (max-width: 900px) {
+  .favorites-button {
+    margin-right: 0;
+  }
+}
+
 </style>

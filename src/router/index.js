@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import SearchView from '../views/SearchView.vue'
 import MovieDetails from '../views/MovieDetails.vue'
+import FavoritosPage from '../views/FavoritosPage.vue' 
 
 const router = createRouter({
   history: createWebHistory(),
@@ -25,8 +26,13 @@ const router = createRouter({
       path: '/login',
       name: 'Login',
       component: () => import('../views/LoginView.vue')
+    },
+    {
+      path: '/favoritos',
+      name: 'favoritos',
+      component: FavoritosPage
     }
   ]
 })
 
-export default router 
+export default router
