@@ -13,9 +13,9 @@
     <div v-else class="movies-grid">
       <MovieCard
         v-for="filme in favoritos"
-        :key="filme.filmeId"
-        :movie="formatFilme(filme)"
-        @click="openMovieModal"
+        :key="filme.id"
+        :movie="filme"
+        @click="openMovieModal(filme)"
       />
     </div>
 
@@ -40,8 +40,30 @@ const selectedMovieId = ref(null);
 const carregarFavoritos = async () => {
   isLoading.value = true;
   try {
+    const cached = localStorage.getItem('favoritosCineVue');
+    if (cached) {
+      favoritos.value = JSON.parse(cached);
+      isLoading.value = false;
+      return;
+    }
+
     const data = await listarFavoritos();
-    favoritos.value = data || [];
+
+    const filmesFormatados = (data || []).map(filme => ({
+      id: filme.id,
+      title: filme.title,
+      posterUrl: filme.poster_path
+        ? `https://image.tmdb.org/t/p/w500${filme.poster_path}`
+        : 'https://via.placeholder.com/500x750?text=Sem+Imagem',
+      release_date: filme.release_date,
+      vote_average: filme.vote_average || 0,
+      genres: filme.genres || [],
+      overview: filme.overview
+    }));
+
+    favoritos.value = filmesFormatados;
+    localStorage.setItem('favoritosCineVue', JSON.stringify(filmesFormatados));
+
   } catch (error) {
     console.error('Erro ao carregar favoritos:', error);
     favoritos.value = [];
@@ -52,20 +74,6 @@ const carregarFavoritos = async () => {
 
 const openMovieModal = (movie) => {
   selectedMovieId.value = movie.id;
-};
-
-const formatFilme = (favorito) => {
-  // Ajusta para o formato esperado pelo MovieCard
-  return {
-    id: favorito.filmeId,
-    title: favorito.titulo,
-    posterUrl: favorito.posterUrl
-      ? favorito.posterUrl
-      : 'https://via.placeholder.com/500x750?text=Sem+Imagem',
-    release_date: favorito.dataLancamento,
-    vote_average: favorito.nota || 0,
-    genres: [] // opcional, se quiser mapear
-  };
 };
 
 onMounted(() => {

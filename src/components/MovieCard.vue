@@ -1,31 +1,56 @@
 <template>
   <div class="movie-card">
     <div class="poster-container" @click="$emit('click', movie)">
-      <img :src="posterUrl" :alt="movie.title" class="movie-poster">
+      <img :src="posterUrl" :alt="movie.title" class="movie-poster" />
       <div class="overlay">
         <div class="top-bar">
           <div class="rating">
             <span class="star">⭐</span>
             <span class="value">{{ movie.vote_average?.toFixed(1) || 'N/A' }}</span>
           </div>
-          <button class="fav-icon-btn" @click.stop="toggleFavorito"
-            :aria-label="isFavorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'">
-            <svg v-if="isFavorito" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="red" width="20"
-              height="20">
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
+
+          <!-- BOTÃO DE FAVORITO APARECE APENAS SE LOGADO -->
+          <button
+            v-if="isLoggedIn"
+            class="fav-icon-btn"
+            @click.stop="toggleFavorito"
+            :aria-label="isFavorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+          >
+            <svg
+              v-if="isFavorito"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="red"
+              width="20"
+              height="20"
+            >
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
            2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09
            C13.09 3.81 14.76 3 16.5 3
            19.58 3 22 5.42 22 8.5
-           c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+           c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              />
             </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" stroke="white"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
-              <path d="M20.84 4.61c-1.54-1.34-3.77-1.34-5.31 0L12 7.09
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="white"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              width="20"
+              height="20"
+            >
+              <path
+                d="M20.84 4.61c-1.54-1.34-3.77-1.34-5.31 0L12 7.09
            l-3.53-2.48c-1.54-1.34-3.77-1.34-5.31 0-1.88
            1.64-1.88 4.3 0 5.94L12 21.35l8.84-10.8
-           c1.88-1.64 1.88-4.3 0-5.94z" />
+           c1.88-1.64 1.88-4.3 0-5.94z"
+              />
             </svg>
-
           </button>
         </div>
         <button class="details-btn">Ver Detalhes</button>
@@ -41,15 +66,19 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { adicionarFavorito, removerFavorito, listarFavoritos } from '../services/favoritosApi';
+import { getUsuarioId } from '../services/user';
 
 const props = defineProps({
   movie: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 });
 
 const isFavorito = ref(false);
+
+// VERIFICA SE USUÁRIO ESTÁ LOGADO
+const isLoggedIn = computed(() => !!getUsuarioId());
 
 const posterUrl = computed(() => {
   return props.movie.posterUrl
@@ -63,15 +92,20 @@ const formatDate = (date) => {
 };
 
 const verificarSeFavorito = async () => {
+  if (!isLoggedIn.value) return; // evita requisição desnecessária se não estiver logado
   try {
     const favoritos = await listarFavoritos();
-    isFavorito.value = favoritos.some(fav => fav.filmeId === props.movie.id);
+    isFavorito.value = favoritos.some((fav) => fav.filmeId === props.movie.id);
   } catch (error) {
     console.error('Erro ao verificar favoritos:', error);
   }
 };
 
 const toggleFavorito = async () => {
+  if (!isLoggedIn.value) {
+    alert('Faça login para gerenciar seus favoritos.');
+    return;
+  }
   try {
     if (isFavorito.value) {
       await removerFavorito(props.movie.id);
@@ -89,6 +123,7 @@ onMounted(() => {
   verificarSeFavorito();
 });
 </script>
+
 
 <style scoped>
 .movie-card {

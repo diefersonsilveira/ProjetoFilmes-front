@@ -5,9 +5,10 @@
         <router-link to="/" class="logo-area">
           <img src="@/assets/logoHome.png" alt="Logo CineVue" class="logo-img" />
         </router-link>
+
         <div class="search-area">
           <div class="search-container">
-            <input type="text" v-model="searchQuery" @keyup.enter="handleSearch" placeholder="Buscar filmes...">
+            <input type="text" v-model="searchQuery" @keyup.enter="handleSearch" placeholder="Buscar filmes..." />
             <button @click="handleSearch" class="search-button" aria-label="Buscar">
               <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -17,12 +18,30 @@
             </button>
           </div>
         </div>
+
         <div class="login-area">
-          <router-link to="/favoritos" class="favorites-button" aria-label="Favoritos">
-            <svg class="heart-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
-              fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- MOSTRA O BOTÃO DE FAVORITOS APENAS SE LOGADO -->
+          <router-link
+            v-if="isLoggedIn"
+            to="/favoritos"
+            class="favorites-button"
+            aria-label="Favoritos"
+          >
+            <svg
+              class="heart-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+              fill="white"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path
-                d="M20.8 4.6c-1.5-1.4-3.9-1.4-5.4 0L12 8l-3.4-3.4c-1.5-1.4-3.9-1.4-5.4 0-1.6 1.5-1.6 4 0 5.5L12 21l8.8-10.9c1.6-1.5 1.6-4 0-5.5z" />
+                d="M20.8 4.6c-1.5-1.4-3.9-1.4-5.4 0L12 8l-3.4-3.4c-1.5-1.4-3.9-1.4-5.4 0-1.6 1.5-1.6 4 0 5.5L12 21l8.8-10.9c1.6-1.5 1.6-4 0-5.5z"
+              />
             </svg>
           </router-link>
 
@@ -33,7 +52,6 @@
             Sair ({{ usuarioNome }})
           </button>
         </div>
-
       </nav>
     </header>
 
@@ -43,31 +61,39 @@
 
     <MovieModal :show="!!selectedMovieId" :movie-id="selectedMovieId" @close="closeMovieModal" />
 
-    <LoginModal :show="showLoginModal" @close="closeLoginModal" @login-success="handleLoginSuccess"
-      @switch-to-register="switchToRegister" />
+    <LoginModal
+      :show="showLoginModal"
+      @close="closeLoginModal"
+      @login-success="handleLoginSuccess"
+      @switch-to-register="switchToRegister"
+    />
 
-    <RegisterModal :show="showRegisterModal" @close="closeRegisterModal" @register="handleRegister"
-      @switch-to-login="switchToLogin" />
+    <RegisterModal
+      :show="showRegisterModal"
+      @close="closeRegisterModal"
+      @register="handleRegister"
+      @switch-to-login="switchToLogin"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import MovieModal from './components/MovieModal.vue'
-import LoginModal from './components/LoginModal.vue'
-import RegisterModal from './components/RegisterModal.vue'
-import { getUsuarioId, getUsuarioNome, clearUsuario } from './services/user'
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import MovieModal from './components/MovieModal.vue';
+import LoginModal from './components/LoginModal.vue';
+import RegisterModal from './components/RegisterModal.vue';
+import { getUsuarioId, getUsuarioNome, clearUsuario } from './services/user';
 
-const router = useRouter()
-const searchQuery = ref('')
-const selectedMovieId = ref(null)
-const showLoginModal = ref(false)
-const showRegisterModal = ref(false)
+const router = useRouter();
+const searchQuery = ref('');
+const selectedMovieId = ref(null);
+const showLoginModal = ref(false);
+const showRegisterModal = ref(false);
 
 const userState = ref({
   id: getUsuarioId(),
-  nome: getUsuarioNome()
+  nome: getUsuarioNome(),
 });
 
 const isLoggedIn = computed(() => !!userState.value.id);
@@ -77,7 +103,7 @@ const handleSearch = () => {
   if (searchQuery.value.trim()) {
     router.push({
       name: 'search',
-      query: { q: searchQuery.value.trim() }
+      query: { q: searchQuery.value.trim() },
     });
   }
 };
@@ -98,11 +124,6 @@ const closeLoginModal = () => {
   showLoginModal.value = false;
 };
 
-/*
-const openRegisterModal = () => {
-  showRegisterModal.value = true;
-};
-*/
 const closeRegisterModal = () => {
   showRegisterModal.value = false;
 };
@@ -121,6 +142,7 @@ const handleLoginSuccess = (user) => {
   console.log('Usuário logado:', user);
   userState.value.id = user.usuarioId;
   userState.value.nome = user.nomeCompleto;
+  router.go(); // atualiza a página para atualizar dados do usuário e favoritos
 };
 
 const handleRegister = (user) => {
@@ -132,6 +154,7 @@ const handleLogout = () => {
   clearUsuario();
   userState.value.id = null;
   userState.value.nome = null;
+  router.go(); // atualiza a página ao sair
 };
 </script>
 

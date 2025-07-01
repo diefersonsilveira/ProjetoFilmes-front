@@ -1,6 +1,16 @@
 <template>
   <div class="home">
     <h2>Filmes Populares</h2>
+
+    <!-- Filtro por Gênero -->
+    <div class="genre-filter">
+      <label for="genre-select">Filtrar por gênero:</label>
+      <select id="genre-select" v-model="selectedGenre">
+        <option value="">Todos</option>
+        <option v-for="genre in genres" :key="genre" :value="genre">{{ genre }}</option>
+      </select>
+    </div>
+
     <div class="movies-grid">
       <MovieCard
         v-for="movie in paginatedMovies"
@@ -56,19 +66,40 @@ const pageSize = 15
 const selectedMovieId = ref(null)
 const showModal = ref(false)
 
+const selectedGenre = ref('')
+
 const openModal = (movie) => {
   selectedMovieId.value = movie.id
   showModal.value = true
 }
 
+const genres = computed(() => {
+  const genreSet = new Set()
+  allMovies.value.forEach(movie => {
+    if (movie.genres) {
+      movie.genres.forEach(genre => genreSet.add(genre.name))
+    }
+  })
+  return Array.from(genreSet).sort()
+})
+
+const filteredMovies = computed(() => {
+  if (!selectedGenre.value) {
+    return allMovies.value
+  }
+  return allMovies.value.filter(movie =>
+    movie.genres && movie.genres.some(genre => genre.name === selectedGenre.value)
+  )
+})
+
 const totalPages = computed(() => {
-  return Math.ceil(allMovies.value.length / pageSize)
+  return Math.ceil(filteredMovies.value.length / pageSize)
 })
 
 const paginatedMovies = computed(() => {
   const start = (currentPage.value - 1) * pageSize
   const end = start + pageSize
-  return allMovies.value.slice(start, end)
+  return filteredMovies.value.slice(start, end)
 })
 
 const fetchMovies = async () => {
@@ -101,6 +132,11 @@ const changePage = (page) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+// Reset para página 1 ao mudar de gênero
+watch(selectedGenre, () => {
+  currentPage.value = 1
+})
+
 onMounted(async () => {
   currentPage.value = Number(route.query.page) || 1
   await fetchMovies()
@@ -122,10 +158,43 @@ watch(
 
 h2 {
   font-size: 2rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   color: #19673B;
   font-weight: 800;
-  text-shadow: none;
+}
+
+.genre-filter {
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.genre-filter select {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background: #19673B; 
+  color: white;
+}
+
+.genre-filter select option {
+  background: white;
+  color: #222;
+}
+
+.genre-filter label {
+  font-weight: 600;
+  color: #333;
+}
+
+.genre-filter select {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
 }
 
 .movies-grid {
@@ -133,7 +202,6 @@ h2 {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 2rem;
   margin-bottom: 2rem;
-  background: #f5f7f4;
 }
 
 .pagination {
@@ -170,7 +238,7 @@ h2 {
 }
 
 .page-btn:hover:not(:disabled) {
-  background: #19673B;
+  background: #145c32;
 }
 
 .page-info {
@@ -196,7 +264,7 @@ h2 {
   }
   h2 {
     font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
   }
 }
 </style>

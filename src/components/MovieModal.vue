@@ -57,7 +57,7 @@
                         <span v-for="i in 5" :key="i" class="estrela" :class="{ filled: i <= Math.round(avaliacao.nota) }">★</span>
                       </div>
                       <p class="avaliacao-comentario">{{ avaliacao.comentario }}</p>
-                      <p class="avaliacao-usuario">Usuário #{{ avaliacao.usuarioId }}</p>
+                      <p class="avaliacao-usuario">{{ avaliacao.nomeUsuario }}</p>
                     </div>
                   </div>
                 </div>
