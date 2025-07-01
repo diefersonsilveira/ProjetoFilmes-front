@@ -24,8 +24,6 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-// Simulação de serviço de login
-// No futuro, troque para seu serviço real
 const fakeLogin = async (email, password) => {
   if (email === 'admin@admin.com' && password === '123456') {
     return { usuarioId: 42 }

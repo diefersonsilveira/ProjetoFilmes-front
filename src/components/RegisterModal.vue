@@ -57,6 +57,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { registerUser } from '../services/userApi'
 
 const props = defineProps({
   show: {
@@ -80,29 +81,34 @@ const switchToLogin = () => {
   emit('switch-to-login')
 }
 
+
 const handleRegister = async () => {
-  if (!email.value || !password.value || !name.value) return
-  
-  isLoading.value = true
-  
+  if (!email.value || !password.value || !name.value) return;
+
+  isLoading.value = true;
+
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    emit('register', {
-      name: name.value,
+    const userPayload = {
+      nomeCompleto: name.value,
       email: email.value,
-      password: password.value
-    })
-    
-    email.value = ''
-    password.value = ''
-    name.value = ''
-    
-    closeModal()
+      senha: password.value
+    };
+
+    const createdUser = await registerUser(userPayload);
+    console.log('Usuário cadastrado com sucesso:', createdUser);
+
+    emit('register', createdUser);
+
+    email.value = '';
+    password.value = '';
+    name.value = '';
+
+    closeModal();
   } catch (error) {
-    console.error('Erro no registro:', error)
+    console.error('Erro ao cadastrar usuário:', error);
+    alert('Erro ao cadastrar usuário. Verifique os dados e tente novamente.');
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 

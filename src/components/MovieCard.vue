@@ -1,15 +1,57 @@
 <template>
-  <div class="movie-card" @click="$emit('click', movie)">
-    <div class="poster-container">
-      <img 
-        :src="posterUrl" 
-        :alt="movie.title"
-        class="movie-poster"
-      >
+  <div class="movie-card">
+    <div class="poster-container" @click="$emit('click', movie)">
+      <img :src="posterUrl" :alt="movie.title" class="movie-poster" />
       <div class="overlay">
-        <div class="rating">
-          <span class="star">⭐</span>
-          <span class="value">{{ movie.vote_average?.toFixed(1) || 'N/A' }}</span>
+        <div class="top-bar">
+          <div class="rating">
+            <span class="star">⭐</span>
+            <span class="value">{{ movie.vote_average?.toFixed(1) || 'N/A' }}</span>
+          </div>
+
+          <!-- BOTÃO DE FAVORITO APARECE APENAS SE LOGADO -->
+          <button
+            v-if="isLoggedIn"
+            class="fav-icon-btn"
+            @click.stop="toggleFavorito"
+            :aria-label="isFavorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'"
+          >
+            <svg
+              v-if="isFavorito"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="red"
+              width="20"
+              height="20"
+            >
+              <path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
+           2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09
+           C13.09 3.81 14.76 3 16.5 3
+           19.58 3 22 5.42 22 8.5
+           c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              />
+            </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="white"
+              stroke="white"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              width="20"
+              height="20"
+            >
+              <path
+                d="M20.84 4.61c-1.54-1.34-3.77-1.34-5.31 0L12 7.09
+           l-3.53-2.48c-1.54-1.34-3.77-1.34-5.31 0-1.88
+           1.64-1.88 4.3 0 5.94L12 21.35l8.84-10.8
+           c1.88-1.64 1.88-4.3 0-5.94z"
+              />
+            </svg>
+          </button>
         </div>
         <button class="details-btn">Ver Detalhes</button>
       </div>
@@ -22,33 +64,66 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue';
+import { adicionarFavorito, removerFavorito, listarFavoritos } from '../services/favoritosApi';
+import { getUsuarioId } from '../services/user';
 
 const props = defineProps({
   movie: {
     type: Object,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
-defineEmits(['click'])
+const isFavorito = ref(false);
+
+// VERIFICA SE USUÁRIO ESTÁ LOGADO
+const isLoggedIn = computed(() => !!getUsuarioId());
 
 const posterUrl = computed(() => {
   return props.movie.posterUrl
     ? props.movie.posterUrl
-    : 'https://via.placeholder.com/500x750?text=Sem+Imagem'
-})
+    : 'https://via.placeholder.com/500x750?text=Sem+Imagem';
+});
 
 const formatDate = (date) => {
-  if (!date) return 'Data não disponível'
-  return new Date(date).toLocaleDateString('pt-BR')
-}
+  if (!date) return 'Data não disponível';
+  return new Date(date).toLocaleDateString('pt-BR');
+};
 
-const genres = computed(() => {
-  if (!props.movie.genres || props.movie.genres.length === 0) return 'Gêneros não informados'
-  return props.movie.genres.map(g => g.name).join(', ')
-})
+const verificarSeFavorito = async () => {
+  if (!isLoggedIn.value) return; // evita requisição desnecessária se não estiver logado
+  try {
+    const favoritos = await listarFavoritos();
+    isFavorito.value = favoritos.some((fav) => fav.filmeId === props.movie.id);
+  } catch (error) {
+    console.error('Erro ao verificar favoritos:', error);
+  }
+};
+
+const toggleFavorito = async () => {
+  if (!isLoggedIn.value) {
+    alert('Faça login para gerenciar seus favoritos.');
+    return;
+  }
+  try {
+    if (isFavorito.value) {
+      await removerFavorito(props.movie.id);
+      isFavorito.value = false;
+    } else {
+      await adicionarFavorito(props.movie.id);
+      isFavorito.value = true;
+    }
+  } catch (error) {
+    console.error('Erro ao alternar favorito:', error);
+  }
+};
+
+onMounted(() => {
+  verificarSeFavorito();
+});
 </script>
+
 
 <style scoped>
 .movie-card {
@@ -58,7 +133,6 @@ const genres = computed(() => {
   overflow: hidden;
   transition: all 0.3s ease;
   height: 100%;
-  cursor: pointer;
   box-shadow: 0 4px 12px rgba(25, 103, 59, 0.07);
 }
 
@@ -70,6 +144,7 @@ const genres = computed(() => {
 .poster-container {
   position: relative;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .movie-poster {
@@ -89,11 +164,9 @@ const genres = computed(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(26, 26, 26, 0.2),
-    rgba(26, 26, 26, 0.9)
-  );
+  background: linear-gradient(to bottom,
+      rgba(26, 26, 26, 0.2),
+      rgba(26, 26, 26, 0.9));
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -106,14 +179,19 @@ const genres = computed(() => {
   opacity: 1;
 }
 
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .rating {
   background: rgba(25, 103, 59, 0.85);
   padding: 0.5rem 1rem;
   border-radius: 20px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 0.5rem;
-  align-self: flex-start;
 }
 
 .star {
@@ -125,6 +203,29 @@ const genres = computed(() => {
   font-weight: bold;
 }
 
+.fav-icon-btn {
+  background: rgba(25, 103, 59, 0.85);
+  /* igual ao .rating */
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.fav-icon-btn:hover {
+  background: rgba(25, 103, 59, 1);
+  transform: scale(1.05);
+}
+
+.fav-icon-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
 .details-btn {
   background: #19673B;
   color: #fff;
@@ -133,67 +234,42 @@ const genres = computed(() => {
   border-radius: 25px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
   width: 100%;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .details-btn:hover {
-  background: #19673B;
+  background: #145c32;
 }
 
 .movie-info {
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .movie-info h3 {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
   color: #222;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2; 
+  -webkit-line-clamp: 2;
   overflow: hidden;
   text-overflow: ellipsis;
-  word-break: break-word; 
-  line-height: 1.2em; 
-  max-height: calc(1.2em * 2); 
 }
 
 .movie-release {
   color: #999;
   font-size: 0.9rem;
-  margin: 0;
-  font-weight: 400;
-}
-
-.movie-genres {
-  color: #bbb;
-  font-size: 0.85rem;
-  margin: 0.3rem 0 0 0;
 }
 
 @media (max-width: 768px) {
   .movie-poster {
     height: 280px;
-  }
-  .overlay {
-    opacity: 1;
-    background: linear-gradient(
-      to bottom,
-      rgba(26, 26, 26, 0),
-      rgba(26, 26, 26, 0.9)
-    );
-  }
-  .rating {
-    font-size: 0.9rem;
-  }
-  .details-btn {
-    font-size: 0.9rem;
-    padding: 0.6rem 1.2rem;
   }
 }
 </style>
