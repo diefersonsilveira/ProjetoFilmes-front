@@ -9,7 +9,6 @@
             <span class="value">{{ movie.vote_average?.toFixed(1) || 'N/A' }}</span>
           </div>
 
-          <!-- BOTÃO DE FAVORITO APARECE APENAS SE LOGADO -->
           <button
             v-if="isLoggedIn"
             class="fav-icon-btn"
@@ -26,10 +25,10 @@
             >
               <path
                 d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
-           2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09
-           C13.09 3.81 14.76 3 16.5 3
-           19.58 3 22 5.42 22 8.5
-           c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                   2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09
+                   C13.09 3.81 14.76 3 16.5 3
+                   19.58 3 22 5.42 22 8.5
+                   c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
               />
             </svg>
             <svg
@@ -46,9 +45,9 @@
             >
               <path
                 d="M20.84 4.61c-1.54-1.34-3.77-1.34-5.31 0L12 7.09
-           l-3.53-2.48c-1.54-1.34-3.77-1.34-5.31 0-1.88
-           1.64-1.88 4.3 0 5.94L12 21.35l8.84-10.8
-           c1.88-1.64 1.88-4.3 0-5.94z"
+                   l-3.53-2.48c-1.54-1.34-3.77-1.34-5.31 0-1.88
+                   1.64-1.88 4.3 0 5.94L12 21.35l8.84-10.8
+                   c1.88-1.64 1.88-4.3 0-5.94z"
               />
             </svg>
           </button>
@@ -76,14 +75,10 @@ const props = defineProps({
 });
 
 const isFavorito = ref(false);
-
-// VERIFICA SE USUÁRIO ESTÁ LOGADO
-const isLoggedIn = computed(() => !!getUsuarioId());
+const isLoggedIn = ref(!!getUsuarioId());
 
 const posterUrl = computed(() => {
-  return props.movie.posterUrl
-    ? props.movie.posterUrl
-    : 'https://via.placeholder.com/500x750?text=Sem+Imagem';
+  return props.movie.posterUrl || 'https://via.placeholder.com/500x750?text=Sem+Imagem';
 });
 
 const formatDate = (date) => {
@@ -92,10 +87,13 @@ const formatDate = (date) => {
 };
 
 const verificarSeFavorito = async () => {
-  if (!isLoggedIn.value) return; // evita requisição desnecessária se não estiver logado
+  if (!isLoggedIn.value) {
+    isFavorito.value = false;
+    return;
+  }
   try {
     const favoritos = await listarFavoritos();
-    isFavorito.value = favoritos.some((fav) => fav.filmeId === props.movie.id);
+    isFavorito.value = favoritos.some(fav => fav.id === props.movie.id);
   } catch (error) {
     console.error('Erro ao verificar favoritos:', error);
   }
@@ -120,6 +118,12 @@ const toggleFavorito = async () => {
 };
 
 onMounted(() => {
+  verificarSeFavorito();
+});
+
+// Sincroniza entre abas
+window.addEventListener('storage', () => {
+  isLoggedIn.value = !!getUsuarioId();
   verificarSeFavorito();
 });
 </script>
@@ -205,7 +209,6 @@ onMounted(() => {
 
 .fav-icon-btn {
   background: rgba(25, 103, 59, 0.85);
-  /* igual ao .rating */
   padding: 0.5rem;
   border-radius: 50%;
   display: flex;

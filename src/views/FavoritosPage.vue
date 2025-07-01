@@ -40,29 +40,21 @@ const selectedMovieId = ref(null);
 const carregarFavoritos = async () => {
   isLoading.value = true;
   try {
-    const cached = localStorage.getItem('favoritosCineVue');
-    if (cached) {
-      favoritos.value = JSON.parse(cached);
-      isLoading.value = false;
-      return;
-    }
-
     const data = await listarFavoritos();
 
-    const filmesFormatados = (data || []).map(filme => ({
-      id: filme.id,
-      title: filme.title,
-      posterUrl: filme.poster_path
-        ? `https://image.tmdb.org/t/p/w500${filme.poster_path}`
+    const filmesFormatados = (data || []).map(favorito => ({
+      id: favorito.filmeId || favorito.id,
+      title: favorito.titulo || favorito.title || 'Título indisponível',
+      posterUrl: favorito.posterPath || favorito.poster_path
+        ? `https://image.tmdb.org/t/p/w500${favorito.posterPath || favorito.poster_path}`
         : 'https://via.placeholder.com/500x750?text=Sem+Imagem',
-      release_date: filme.release_date,
-      vote_average: filme.vote_average || 0,
-      genres: filme.genres || [],
-      overview: filme.overview
+      release_date: favorito.dataLancamento || favorito.release_date || '',
+      vote_average: favorito.nota || favorito.vote_average || 0,
+      genres: favorito.genres || [],
+      overview: favorito.sinopse || favorito.overview || ''
     }));
 
     favoritos.value = filmesFormatados;
-    localStorage.setItem('favoritosCineVue', JSON.stringify(filmesFormatados));
 
   } catch (error) {
     console.error('Erro ao carregar favoritos:', error);
