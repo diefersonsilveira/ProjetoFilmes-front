@@ -19,6 +19,11 @@ export const criarAvaliacao = async (filmeId, nota, comentario) => {
 };
 
 export const listarAvaliacoesPorFilme = async (filmeId) => {
-  const response = await axios.get(`${BASE_URL}/filme/${filmeId}`);
-  return response.data;
+    try {
+        const response = await axios.get(`${BASE_URL}/filme/${filmeId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Erro ao buscar avaliações:', error);
+        return [];
+    }
 };
