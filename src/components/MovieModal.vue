@@ -86,8 +86,6 @@ const props = defineProps({
   movieId: Number
 });
 
-const emit = defineEmits(['close']);
-
 const movie = ref(null);
 const nota = ref(0);
 const comentario = ref('');

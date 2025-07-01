@@ -18,7 +18,7 @@
     />
 
     <div class="pagination" v-if="totalPages > 1">
-      <button 
+      <button
         :disabled="currentPage === 1"
         @click="changePage(currentPage - 1)"
         class="page-btn"
@@ -28,7 +28,7 @@
       <span class="page-info">
         Página {{ currentPage }} de {{ totalPages }}
       </span>
-      <button 
+      <button
         :disabled="currentPage === totalPages"
         @click="changePage(currentPage + 1)"
         class="page-btn"
@@ -79,7 +79,10 @@ const fetchMovies = async () => {
       if (Array.isArray(parsed)) {
         allMovies.value = parsed
       }
-    } catch {}
+    } catch (error) {
+      console.error('Erro ao parsear cache de filmes:', error)
+      localStorage.removeItem('popularMovies')
+    }
   }
   try {
     const data = await getPopularMovies()
